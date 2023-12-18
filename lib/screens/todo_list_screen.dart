@@ -1,17 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_getx/constant/route_constant.dart';
 import 'package:get/get.dart';
 
 import '../controllers/TodoController.dart';
+import '../models/data.dart';
 
-class ListScreen extends StatefulWidget {
-  const ListScreen({super.key});
+class TodoListScreen extends StatefulWidget {
+  const TodoListScreen({super.key});
 
   @override
-  State<ListScreen> createState() => _ListScreenState();
+  State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-class _ListScreenState extends State<ListScreen> {
+class _TodoListScreenState extends State<TodoListScreen> {
   @override
   void initState() {
     super.initState();
@@ -98,21 +100,7 @@ class _ListScreenState extends State<ListScreen> {
                                           ),
                                         ),
                                         onPressed: () async {
-                                          /*await  Navigator.push(context, MaterialPageRoute(
-                                            builder: (context) => const EditScreen(),
-                                            settings: RouteSettings(
-                                              arguments: todos[index],
-                                            ),
-                                          )
-                                          ).then((isCompleteUpdated){
-                                            if (kDebugMode) {
-                                              print('isCompleteUpdated: $isCompleteUpdated');
-                                            }
-                                            if(isCompleteUpdated!=null && isCompleteUpdated){
-                                              //refresh the page
-                                              _pullRefresh();
-                                            }
-                                           });*/
+                                          Get.toNamed(RouteConstant.editTodoScreen, arguments:{'todo': todoController.todos![index]});
                                         },
                                         child: const Text(
                                           "Edit",
@@ -136,7 +124,7 @@ class _ListScreenState extends State<ListScreen> {
                                           ),
                                         ),
                                         onPressed: () {
-                                          /*_dialogBuilder(context, todos[index]);*/
+                                          openConfirmDialog(todoController.todos![index]);
                                         },
                                         child: const Text(
                                           "Delete",
@@ -154,77 +142,82 @@ class _ListScreenState extends State<ListScreen> {
                       ))
                   : const Center(
                       child: Text("Todo list is empty and create new")))),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          Get.toNamed(RouteConstant.createTodoScreen, arguments:{'title': 'Create Todo'});
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
   Future<void> _pullRefresh() async {
-    setState(() {});
+    final TodoController todoController = Get.put(TodoController());
+    todoController.refreshTodoList();
   }
 
-/*Future<void> _dialogBuilder(BuildContext context, Data todo) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return
-          ScaffoldMessenger(child: Builder(builder: (context){
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-              body: AlertDialog(
-            title: const Text('Confirm to delete'),
-            content: const Text(
-                'Are you sure to delete?'
-
+  Future<void> openConfirmDialog(Data todo) async {
+    if (kDebugMode) {
+      print("todo: ${todo.toJson()}");
+    }
+    final TodoController todoController = Get.put(TodoController());
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Confirm to delete'),
+        content: const Text('Are you sure to delete?'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
+            child: const Text('Cancel'),
+            onPressed: () {
+              Get.back();
+            },
+          ),
 
-              Consumer<DataProvider>(builder: (context, dataProvider, child) {
-                return
-                  dataProvider.loading ?
-                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(),)
-
-                      :
-                  TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme
-                            .of(context)
-                            .textTheme
-                            .labelLarge,
-                      ),
-                      child: const Text('Ok'),
-                      onPressed: () async {
-                        var dataProvider = Provider.of<DataProvider>(
-                            context, listen: false);
-                        await dataProvider.callDeleteTodoApi(this, todo.todoId);
-                        if (dataProvider.isBack){
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Deleted successfully."),
-                              )
-                          );
-                          await Future.delayed(const Duration(seconds: 1)).then((value) =>
-                              Navigator.of(context).pop()
-                          ).then((value){_pullRefresh();});
-                        }
-
+          Obx(() {
+            return todoController.todoLoading.value?
+                const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(),)
+              :
+                TextButton(
+                  child: const Text("ok"),
+                  onPressed: () async {
+                    await todoController.delete(todo.todoId);
+                    if(todoController.deletedTodo != null){
+                      if (kDebugMode) {
+                        print("deleted todo success");
                       }
-                  );
-              })
-            ],
-          ));
+                      Get.back();
+                      Get.snackbar(
+                        "Alert",
+                        "Deleted todo successfully.",
+                        colorText: Colors.black54,
+                        backgroundColor: Colors.white,
+                        icon: const Icon(Icons.add_alert),
+                      );
 
-        }));
-      },
+                    }else{
+                      if (kDebugMode) {
+                        print("deleted todo failed");
+                      }
+                      Get.back();
+                      Get.snackbar(
+                        "Alert",
+                        "Deleted todo Failed.",
+                        colorText: Colors.black54,
+                        backgroundColor: Colors.white,
+                        icon: const Icon(Icons.add_alert),
+                      );
+
+              }
+
+            },
+          );
+          }
+          )
+        ],
+      ),
     );
   }
-*/
 }

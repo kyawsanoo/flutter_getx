@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
       title: 'Todo App',
-      initialRoute: RouteConstant.listScreen,
+      initialRoute: RouteConstant.todoListScreen,
       getPages: pages,
     );
   }
