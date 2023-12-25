@@ -69,7 +69,7 @@ class TodoProvider extends GetConnect {
       print('UpdateTodo Api Call Starting todoId: $todoId completed: $completed');
     }
     dynamic body = jsonEncode({
-      "completed":false,
+      "completed": completed,
     });
     dynamic header = {"Content-Type": "application/json"};
     if (kDebugMode) {
