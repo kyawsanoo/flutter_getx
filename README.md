@@ -1,6 +1,6 @@
 # flutter_getx
 
-A Flutter app with getX for it's app state and dependency injection, getX's page route and getX's interaction with api CRUD operations.
+A Flutter app with getX for it's app state and dependency injection, getX's page route and getX's interaction with api CRUD operations using http client GetConnect.
 
 # api info
 https://dummyjson.com/docs/todos
